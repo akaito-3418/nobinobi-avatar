@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f5e9f2">
+<title>のびのびアバター</title>
+<style>
+:root{color-scheme:light;--ink:#342b3a;--pink:#e66ba5;--pale:#fff7fc;--line:#ead8e6;--muted:#806f80}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#fff4fa,#f1f2ff);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+main{width:min(100% - 28px,620px);margin:24px auto 40px}.hero{text-align:center;padding:10px 0 18px}.eyebrow{font-size:.8rem;letter-spacing:.12em;color:var(--muted);font-weight:800}.hero h1{font-size:clamp(2rem,8vw,3rem);margin:.25rem 0}.hero p{margin:0;color:var(--muted)}
+.card{background:#ffffffd9;border:1px solid var(--line);border-radius:22px;padding:18px;margin:14px 0;box-shadow:0 8px 30px #6b46630c}
+h2{font-size:1.05rem;margin:0 0 12px}.choices{display:flex;gap:10px}.choice{flex:1}.btn{font:inherit;font-weight:800;border:1px solid var(--line);border-radius:13px;padding:12px 15px;background:white;color:var(--ink);cursor:pointer;transition:transform .12s,box-shadow .12s}.btn:active{transform:scale(.98)}.btn:focus-visible{outline:3px solid #b68ae6;outline-offset:2px}.choice[aria-pressed=true]{border:2px solid var(--pink);background:#fff0f7}.primary{background:var(--pink);color:white;border-color:var(--pink)}.full{width:100%;margin-top:12px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{text-align:center;padding:14px 8px}.stat small{color:var(--muted);font-weight:700}.value{font-size:2.25rem;font-weight:900;line-height:1.25}.unit{font-size:1rem}.stage{min-height:270px;max-height:55vh;overflow:auto;display:flex;align-items:flex-end;justify-content:center;padding:22px 12px;background:linear-gradient(#f9f4ff,#fff7fb);border:1px dashed #e4cfe2;border-radius:16px}.avatar{display:flex;flex-direction:column;align-items:center;width:min(100%,240px);transform-origin:bottom center}.part{display:block;width:min(100%,190px);height:auto;object-fit:contain;flex-shrink:0}.middle-stack{display:flex;flex-direction:column;align-items:center;width:100%;gap:0}.middle-stack img{width:min(100%,190px);height:auto;display:block}.fallback{width:100%;display:flex;justify-content:center;align-items:center;text-align:center;font-weight:800;color:#8a6286;background:#f4ddeb;border:1px dashed #cc9cbd;min-height:52px}.avatar-name{font-weight:850;margin-bottom:10px}.hint,.log{font-size:.88rem;color:var(--muted);text-align:center}.progress{height:8px;background:#f0dfec;border-radius:9px;overflow:hidden;margin:12px 0 4px}.progress div{height:100%;width:99%;background:var(--pink);transition:width .2s}.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions .btn{margin-top:8px}.top-actions{margin:0 0 14px}.stage{height:clamp(300px,48vh,440px);min-height:300px;max-height:none;align-items:flex-end;overflow:hidden}.stage .avatar{flex-shrink:0;will-change:transform;transform-origin:bottom center}.hidden{display:none!important}.result-title{font-size:1.7rem;font-weight:900;text-align:center}.result-text{text-align:center;font-weight:750;margin:6px 0 16px}.note{font-size:.83rem;color:var(--muted);line-height:1.6}.footer{text-align:center;font-size:.8rem;color:var(--muted);margin-top:20px}
+@media(max-width:420px){main{width:min(100% - 18px,620px);margin-top:12px}.card{padding:14px}.stage{height:300px;min-height:300px}.value{font-size:1.9rem}.btn{padding:11px 9px}}
+</style>
+</head>
+<body>
+<main>
+<header class="hero"><h1>のびのびアバター</h1><p>どこまで伸ばせる？ 限界を見極めよう！</p></header>
+<section id="select-screen" class="card">
+<h2>どっちを伸ばす？</h2>
+<div class="choices"><button class="btn choice" data-char="kipfel" aria-pressed="true">キプフェル</button><button class="btn choice" data-char="nemesis" aria-pressed="false">ネメシス</button></div>
+<button id="start" class="btn primary full">ゲームスタート</button>
+<p class="note">「もっと伸ばす！」で成功すると1mずつ伸びるよ。失敗する前に「完成！」を選ぼう！</p>
+</section>
+<section id="game-screen" class="hidden">
+<div class="stats"><div class="card stat"><small>現在の長さ</small><div class="value"><span id="height">1</span><span class="unit"> m</span></div></div><div class="card stat"><small>次の成功率</small><div class="value"><span id="rate">99</span><span class="unit">%</span></div></div></div>
+<div class="card"><div id="avatar-name" class="avatar-name">キプフェル</div><div class="actions top-actions"><button id="stretch" class="btn primary">もっと伸ばす！</button><button id="finish" class="btn">完成！</button></div><div class="stage" id="stage"></div><div class="progress"><div id="meter"></div></div><p class="hint">上半身・胴体・下半身を積み重ねて伸びるよ</p><p id="log" class="log" aria-live="polite">準備はいい？</p><button id="back" class="btn full">アバター選択に戻る</button></div>
+</section>
+<section id="result-screen" class="card hidden"><div id="result-title" class="result-title">完成！</div><p id="result-text" class="result-text"></p><div class="stage" id="result-stage"></div><div class="stat"><small>今回の記録</small><div class="value"><span id="record">1</span><span class="unit"> m</span></div></div><div class="actions share-actions"><button id="post-x" class="btn primary">Xに投稿する</button><button id="copy" class="btn">結果をテキストとしてコピー</button></div><p id="copy-status" class="hint" aria-live="polite"></p><button id="retry" class="btn full">もう一度遊ぶ</button><button id="change" class="btn full">アバターを選び直す</button></section>
+<footer class="footer">のびのびアバター · 赤糸の裁縫箱</footer>
+</main>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const characters = {
+    kipfel:{name:"キプフェル",files:{up:"images/kipfel_up.png",middle:"images/kipfel_middle.png",down:"images/kipfel_down.png"}},
+    nemesis:{name:"ネメシス",files:{up:"images/nemesis_up.png",middle:"images/nemesis_middle.png",down:"images/nemesis_down.png"}}
+  };
+  let selected="kipfel", height=1, rate=99, playing=false, collapsed=false, lastMessage="";
+  const baseRate=85;
+  function show(id){["select-screen","game-screen","result-screen"].forEach(x=>$(x).classList.toggle("hidden",x!==id))}
+  function makePart(src,label,cls){
+    const img=document.createElement("img"); img.className="part "+(cls||""); img.src=src; img.alt=label; img.draggable=false;
+    img.onerror=()=>{const fallback=document.createElement("div");fallback.className="fallback";fallback.textContent=label+"画像を配置してください";img.replaceWith(fallback)};
+    return img;
+  }
+  function makeAvatar(stage, h, minimal=false){
+    const c=characters[selected], avatar=document.createElement("div");avatar.className="avatar";
+    avatar.dataset.character=selected;
+    const up=makePart(c.files.up,"上半身","");
+    const stack=document.createElement("div");stack.className="middle-stack";
+    const down=makePart(c.files.down,"下半身","");
+    avatar.append(up,stack,down);
+    avatar._stack=stack; avatar._up=up; avatar._down=down; avatar._minimal=minimal;
+    updateAvatarParts(avatar,h,minimal);
+    return avatar;
+  }
+  function updateAvatarParts(avatar,h,minimal=false){
+    const stack=avatar._stack;
+    // 失敗リザルトは胴体を取り除き、上半身＋下半身だけの最小状態にする。
+    const targetCount=minimal?0:h;
+    while(stack.children.length>targetCount) stack.lastElementChild.remove();
+    while(stack.children.length<targetCount){
+      stack.appendChild(makePart(characters[selected].files.middle,"胴体",""));
+    }
+    avatar._minimal=minimal;
+  }
+  function fitAvatar(stage, avatar){
+    const style=getComputedStyle(stage);
+    const available=stage.clientHeight-parseFloat(style.paddingTop)-parseFloat(style.paddingBottom);
+    // offsetHeight は transform の影響を受けない。レイアウト確定後に1回だけ縮尺を更新する。
+    const naturalHeight=avatar.offsetHeight;
+    const scale=naturalHeight>0?Math.min(1,available/naturalHeight):1;
+    avatar.style.transform=`scale(${scale})`;
+    avatar.style.visibility="visible";
+  }
+  function putAvatar(stageId, h, minimal=false){
+    const stage=$(stageId);
+    let avatar=stage.querySelector(".avatar");
+    if(!avatar || avatar.dataset.character!==selected){
+      avatar=makeAvatar(stage,h,minimal);
+      avatar.style.visibility="hidden";
+      stage.replaceChildren(avatar);
+    } else {
+      updateAvatarParts(avatar,h,minimal);
+    }
+    let queued=false;
+    const fit=()=>{
+      if(queued)return; queued=true;
+      requestAnimationFrame(()=>{queued=false;fitAvatar(stage,avatar)});
+    };
+    // 既存の画像DOMを使い回すので、伸ばすたびに全画像が再読込・点滅しない。
+    avatar.addEventListener("load",fit,true);
+    avatar.addEventListener("error",fit,true);
+    fit();
+    return avatar;
+  }
+  function render(){
+    $("height").textContent=height;$("rate").textContent=Number(rate.toFixed(1));
+    $("meter").style.width=rate+"%";$("avatar-name").textContent=characters[selected].name;
+    putAvatar("stage",height);
+    $("stretch").textContent="もっと伸ばす！（"+Number(rate.toFixed(1))+"%）";
+  }
+  function start(){
+    height=1;rate=99;playing=true;collapsed=false;lastMessage="";
+    $("log").textContent="伸ばす準備はOK！";$("copy-status").textContent="";
+    show("game-screen");render();
+  }
+  function finish(failed){
+    if(!playing)return;playing=false;collapsed=failed;
+    $("result-title").textContent=failed?"縮んでしまった…":"完成！";
+    $("result-text").textContent=failed?characters[selected].name+"は"+height+"mで縮んでしまった！":characters[selected].name+"を"+height+"m伸ばした！";
+    $("record").textContent=height;
+    putAvatar("result-stage",height,failed);
+    const gameUrl=window.location.href.split("#")[0];
+    lastMessage=(failed?"のびのびアバター："+characters[selected].name+"を"+height+"mまで伸ばしたけど、縮んでしまった…":"のびのびアバター："+characters[selected].name+"を"+height+"m伸ばした！")+"\n#のびのびアバター\n"+gameUrl;
+    $("copy-status").textContent="";show("result-screen");
+  }
+  function stretch(){
+    if(!playing)return;
+    if(Math.random()*100>=rate){finish(true);return}
+    height++;
+    // 元コードに合わせ、成功後は基礎成功率85%＋高さによる補正＋0〜5%のランダム幅（上限99%）。
+    const heightBonus=(100-baseRate)/Math.sqrt(height);
+    const randomBonus=Math.random()*5;
+    rate=Math.min(99,Math.floor((baseRate+heightBonus+randomBonus)*100)/100);
+    $("log").textContent="成功！ "+height+"mまで伸びた！";
+    render();
+  }
+  document.querySelectorAll("[data-char]").forEach(b=>b.addEventListener("click",()=>{
+    selected=b.dataset.char;
+    document.querySelectorAll("[data-char]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
+  }));
+  $("start").addEventListener("click",start);
+  $("stretch").addEventListener("click",stretch);
+  $("finish").addEventListener("click",()=>finish(false));
+  $("back").addEventListener("click",()=>{playing=false;show("select-screen")});
+  $("retry").addEventListener("click",start);
+  $("change").addEventListener("click",()=>show("select-screen"));
+  $("post-x").addEventListener("click",()=>{
+    const gameUrl=window.location.href.split("#")[0];
+    const resultText=lastMessage.replace("\n#のびのびアバター\n"+gameUrl, "");
+    const intent="https://twitter.com/intent/tweet?"+new URLSearchParams({text:resultText+"\n#のびのびアバター",url:gameUrl}).toString();
+    window.open(intent,"_blank","noopener,noreferrer");
+  });
+  $("copy").addEventListener("click",async()=>{
+    try{
+      if(navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(lastMessage);
+      else {const area=document.createElement("textarea");area.value=lastMessage;area.style.position="fixed";area.style.opacity="0";document.body.appendChild(area);area.select();const ok=document.execCommand("copy");area.remove();if(!ok)throw Error("copy failed")}
+      $("copy-status").textContent="コピーしました！ SNSなどに貼り付けてね。";
+    }catch(e){
+      $("copy-status").textContent="自動コピーできませんでした。下の文章を長押し／選択してコピーしてください。";
+      const area=document.createElement("textarea");area.value=lastMessage;area.readOnly=true;area.setAttribute("aria-label","結果テキスト");area.style.width="100%";area.style.minHeight="72px";area.style.marginTop="8px";$("copy-status").after(area);area.focus();area.select();
+    }
+  });
+})();
+</script>
+</body>
+</html>
