@@ -358,22 +358,27 @@ h2{font-size:1.05rem;margin:0 0 12px}.choices{display:flex;gap:10px}.choice{flex
   $("retry").addEventListener("click", start);
   $("change").addEventListener("click", () => show("select-screen"));
 
-  // X投稿画面を開く
-  $("post-x").addEventListener("click", () => {
-    const gameUrl = window.location.href.split("#")[0];
-    const resultText = lastMessage.replace(
-      "\n#のびのびアバター\n" + gameUrl,
-      ""
-    );
+// X投稿画面を開く
+$("post-x").addEventListener("click", () => {
+  const gameUrl = window.location.href.split("#")[0];
 
-    const intent = "https://x.com/intent/post?" +
-      new URLSearchParams({
-        text: resultText + "\n#のびのびアバター\n\n",
-        url: gameUrl
-      }).toString();
+  // 末尾のハッシュタグとURLを除去
+  const resultText = lastMessage
+    .replace(/\n#のびのびアバター\n+.*$/, "")
+    .trim();
 
-    window.open(intent, "_blank", "noopener,noreferrer");
-  });
+  const postText =
+    resultText +
+    "\n#のびのびアバター\n\n" +
+    gameUrl;
+
+  const intent = "https://x.com/intent/post?" +
+    new URLSearchParams({
+      text: postText
+    }).toString();
+
+  window.open(intent, "_blank", "noopener,noreferrer");
+});
 
   // 結果テキストをコピー
   $("copy").addEventListener("click", async () => {
