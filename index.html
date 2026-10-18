@@ -307,7 +307,10 @@ h2{font-size:1.05rem;margin:0 0 12px}.choices{display:flex;gap:10px}.choice{flex
           + "を" + height + "mまで伸ばしたけど、縮んでしまった…"
         : "のびのびアバター：" + characters[selected].name
           + "を" + height + "m伸ばした！"
-    ) + comparisonMessage + "\n#のびのびアバター\n" + gameUrl;
+    ) + comparisonMessage + "\n#のびのびアバター\n\n" + gameUrl;
+
+    $("copy-status").textContent = "";
+    show("result-screen");
 
     $("copy-status").textContent = "";
     show("result-screen");
